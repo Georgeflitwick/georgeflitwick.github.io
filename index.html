@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spin the Wheel 🎡</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        text-align: center;
+        background: linear-gradient(135deg, #f8f9fa, #e3f2fd);
+        margin: 0;
+        padding: 20px;
+    }
+    h1 { margin: 10px 0; }
+    #input-area {
+        max-width: 500px;
+        margin: auto;
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    input {
+        width: 70%;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+    button {
+        margin: 5px;
+        padding: 10px 15px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        background-color: #1976d2;
+        color: white;
+        transition: background 0.2s;
+    }
+    button:hover { background-color: #1565c0; }
+    canvas { margin-top: 20px; max-width: 100%; height: auto; }
+    #entries-list { margin-top: 10px; }
+    .entry-item {
+        display: inline-block;
+        background: #eee;
+        padding: 5px 10px;
+        margin: 3px;
+        border-radius: 5px;
+    }
+    .remove-btn {
+        background: red;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        margin-left: 5px;
+        font-size: 12px;
+        line-height: 18px;
+        padding: 0;
+    }
+    #result { font-size: 1.4rem; font-weight: bold; margin-top: 15px; }
+</style>
+</head>
+<body>
+
+<h1>🎯 Spin the Wheel</h1>
+
+<div id="input-area">
+    <input type="text" id="new-entry" placeholder="Entrez un mot">
+    <button id="add-entry">Ajouter</button>
+</div>
+
+<div id="entries-list"></div>
+
+<canvas id="wheel" width="500" height="500"></canvas>
+<button id="spin">Tourner 🎡</button>
+
+<h2 id="result"></h2>
+
+<audio id="spin-sound" src="https://www.soundjay.com/buttons/button-16.mp3" preload="auto"></audio>
+
+<script>
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const spinBtn = document.getElementById("spin");
+const result = document.getElementById("result");
+const spinSound = document.getElementById("spin-sound");
+
+let entries = JSON.parse(localStorage.getItem("wheelEntries")) || [];
+let startAngle = 0;
+let arc;
+let spinTimeout = null;
+let spinAngleStart;
+let spinTime = 0;
+let spinTimeTotal = 0;
+
+function saveEntries() {
+    localStorage.setItem("wheelEntries", JSON.stringify(entries));
+}
+
+function drawEntriesList() {
+    const listDiv = document.getElementById("entries-list");
+    listDiv.innerHTML = "";
+    entries.forEach((e, i) => {
+        const item = document.createElement("div");
+        item.className = "entry-item";
+        item.textContent = e;
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "×";
+        removeBtn.className = "remove-btn";
+        removeBtn.onclick = () => {
+            entries.splice(i, 1);
+            saveEntries();
+            drawEntriesList();
+            drawWheel();
+        };
+        item.appendChild(removeBtn);
+        listDiv.appendChild(item);
+    });
+}
+
+function drawWheel() {
+    const outsideRadius = 200;
+    const textRadius = 160;
+    const insideRadius = 50;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (entries.length === 0) return;
+    arc = Math.PI / (entries.length / 2);
+    for (let i = 0; i < entries.length; i++) {
+        const angle = startAngle + i * arc;
+        ctx.fillStyle = `hsl(${i * 360 / entries.length}, 70%, 50%)`;
+        ctx.beginPath();
+        ctx.arc(250, 250, outsideRadius, angle, angle + arc, false);
+        ctx.arc(250, 250, insideRadius, angle + arc, angle, true);
+        ctx.fill();
+        ctx.save();
+        ctx.fillStyle = "white";
+        ctx.translate(250 + Math.cos(angle + arc / 2) * textRadius,
+                      250 + Math.sin(angle + arc / 2) * textRadius);
+        ctx.rotate(angle + arc / 2);
+        ctx.font = "bold 16px Arial";
+        ctx.fillText(entries[i], -ctx.measureText(entries[i]).width / 2, 0);
+        ctx.restore();
+    }
+    ctx.fillStyle = "black";
+    ctx.beginPath();
+    ctx.moveTo(250 - 10, 250 - (outsideRadius + 20));
+    ctx.lineTo(250 + 10, 250 - (outsideRadius + 20));
+    ctx.lineTo(250, 250 - (outsideRadius - 5));
+    ctx.fill();
+}
+
+function rotateWheel() {
+    spinTime += 30;
+    if (spinTime >= spinTimeTotal) {
+        stopRotateWheel();
+        return;
+    }
+    const spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
+    startAngle += (spinAngle * Math.PI / 180);
+    drawWheel();
+    spinSound.play();
+    spinTimeout = requestAnimationFrame(rotateWheel);
+}
+
+function stopRotateWheel() {
+    cancelAnimationFrame(spinTimeout);
+    const degrees = startAngle * 180 / Math.PI + 90;
+    const arcd = arc * 180 / Math.PI;
+    const index = Math.floor((360 - (degrees % 360)) / arcd);
+    result.textContent = "🎉 Résultat : " + entries[index];
+}
+
+function easeOut(t, b, c, d) {
+    const ts = (t /= d) * t;
+    const tc = ts * t;
+    return b + c * (tc + -3 * ts + 3 * t);
+}
+
+document.getElementById("add-entry").addEventListener("click", () => {
+    const input = document.getElementById("new-entry");
+    const value = input.value.trim();
+    if (value && !entries.includes(value)) {
+        entries.push(value);
+        saveEntries();
+        drawEntriesList();
+        drawWheel();
+        input.value = "";
+    }
+});
+
+spinBtn.addEventListener("click", () => {
+    if (entries.length < 2) {
+        alert("Ajoutez au moins deux options !");
+        return;
+    }
+    spinAngleStart = Math.random() * 10 + 10;
+    spinTime = 0;
+    spinTimeTotal = Math.random() * 3000 + 4000;
+    rotateWheel();
+});
+
+drawEntriesList();
+drawWheel();
+</script>
+</body>
+</html>
