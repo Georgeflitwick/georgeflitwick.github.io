@@ -1,1 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pierre-Papier-Ciseaux ✊📄✂️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Fredoka One', cursive;
+            background: linear-gradient(135deg, #f8f9fa, #e3f2fd);
+            text-align: center;
+            padding: 20px;
+        }
+        h1 { font-size: 2.5em; color: black; }
+        .choices button {
+            font-size: 20px;
+            padding: 10px 20px;
+            margin: 10px;
+            background: #ff9800;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+        .choices button:hover { background: #e68900; }
+        .result { font-size: 1.5em; margin-top: 20px; font-weight: bold; }
+        .rules {
+            max-width: 800px;
+            margin: 40px auto;
+            text-align: left;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<h1>Pierre-Papier-Ciseaux ✊📄✂️</h1>
+
+<div class="choices">
+    <button onclick="play('Pierre')">✊ Pierre</button>
+    <button onclick="play('Papier')">📄 Papier</button>
+    <button onclick="play('Ciseaux')">✂️ Ciseaux</button>
+</div>
+
+<div class="result" id="result"></div>
+
+<div class="rules">
+    <h2>📜 Règles du jeu</h2>
+    <p>
+        Choisissez entre pierre, papier ou ciseaux.  
+        - La pierre bat les ciseaux  
+        - Le papier bat la pierre  
+        - Les ciseaux battent le papier  
+        Si les deux joueurs choisissent la même chose, c'est une égalité.
+    </p>
+</div>
+
+<script>
+    const choices = ["Pierre", "Papier", "Ciseaux"];
+
+    function play(playerChoice) {
+        const computerChoice = choices[Math.floor(Math.random() * 3)];
+        let result = "";
+
+        if (playerChoice === computerChoice) {
+            result = `Égalité ! Vous avez choisi ${playerChoice} et l'ordinateur aussi.`;
+        } else if (
+            (playerChoice === "Pierre" && computerChoice === "Ciseaux") ||
+            (playerChoice === "Papier" && computerChoice === "Pierre") ||
+            (playerChoice === "Ciseaux" && computerChoice === "Papier")
+        ) {
+            result = `Gagné 🎉 ! Vous : ${playerChoice} | Ordinateur : ${computerChoice}`;
+        } else {
+            result = `Perdu 😢 ! Vous : ${playerChoice} | Ordinateur : ${computerChoice}`;
+        }
+
+        document.getElementById("result").textContent = result;
+    }
+</script>
+
+</body>
+</html>
 
