@@ -1,1 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chiffre Mystère 🔢</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Fredoka One', cursive;
+            background: linear-gradient(135deg, #f8f9fa, #e3f2fd);
+            text-align: center;
+            padding: 20px;
+        }
+        h1 { font-size: 2.5em; color: black; }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 80px;
+            text-align: center;
+        }
+        button {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-left: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover { background: #e68900; }
+        .result { font-size: 1.5em; margin-top: 20px; font-weight: bold; }
+        .rules {
+            max-width: 800px;
+            margin: 40px auto;
+            text-align: left;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<h1>Chiffre Mystère 🔢</h1>
+
+<p>Devinez le chiffre mystère entre 1 et 100</p>
+<input type="number" id="guess" min="1" max="100">
+<button onclick="checkGuess()">Deviner</button>
+
+<div class="result" id="result"></div>
+
+<div class="rules">
+    <h2>📜 Règles du jeu</h2>
+    <p>
+        L'ordinateur choisit un nombre entre 1 et 100.  
+        Vous devez le deviner en un minimum d'essais.  
+        Après chaque tentative, vous saurez si le nombre mystère est plus grand ou plus petit.
+    </p>
+</div>
+
+<script>
+    const mysteryNumber = Math.floor(Math.random() * 100) + 1;
+    let attempts = 0;
+
+    function checkGuess() {
+        const guess = Number(document.getElementById("guess").value);
+        attempts++;
+
+        if (guess === mysteryNumber) {
+            document.getElementById("result").textContent = `Bravo 🎉 ! Vous avez trouvé en ${attempts} essais.`;
+        } else if (guess < mysteryNumber) {
+            document.getElementById("result").textContent = "C'est plus grand 📈";
+        } else {
+            document.getElementById("result").textContent = "C'est plus petit 📉";
+        }
+    }
+</script>
+
+</body>
+</html>
 
