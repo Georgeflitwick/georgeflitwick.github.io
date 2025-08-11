@@ -1,1 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game 🃏</title>
+
+    <!-- Police Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Fredoka One', cursive;
+            background: linear-gradient(135deg, #f8f9fa, #e3f2fd);
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: black;
+            font-size: 2.5em;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: #ff9800;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        .card.flipped {
+            background-color: white;
+            color: black;
+        }
+        #message {
+            font-size: 1.5em;
+            margin-top: 20px;
+            font-weight: bold;
+            color: green;
+        }
+        .rules {
+            max-width: 800px;
+            margin: 40px auto;
+            text-align: left;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Memory Game 🃏</h1>
+
+    <div class="game-board" id="gameBoard"></div>
+
+    <div id="message"></div>
+
+    <div class="rules">
+        <h2>📜 Règles du jeu</h2>
+        <p>
+            Le Memory Game est un jeu où vous devez retrouver toutes les paires de cartes identiques.
+            Cliquez sur deux cartes pour les retourner :
+        </p>
+        <ul>
+            <li>Si elles sont identiques, elles restent retournées.</li>
+            <li>Si elles sont différentes, elles se retournent automatiquement.</li>
+            <li>Le but est de retrouver toutes les paires le plus rapidement possible.</li>
+        </ul>
+    </div>
+
+    <script>
+        const symbols = ['🍎', '🍌', '🍇', '🍒', '🍉', '🥝', '🍍', '🍓'];
+        let cards = [...symbols, ...symbols];
+        let firstCard = null;
+        let secondCard = null;
+        let lockBoard = false;
+        let matchedPairs = 0;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function createBoard() {
+            const board = document.getElementById('gameBoard');
+            shuffle(cards);
+            cards.forEach(symbol => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.symbol = symbol;
+                card.textContent = '';
+                card.addEventListener('click', flipCard);
+                board.appendChild(card);
+            });
+        }
+
+        function flipCard() {
+            if (lockBoard || this === firstCard || this.classList.contains('flipped')) return;
+            this.classList.add('flipped');
+            this.textContent = this.dataset.symbol;
+
+            if (!firstCard) {
+                firstCard = this;
+                return;
+            }
+            secondCard = this;
+            checkForMatch();
+        }
+
+        function checkForMatch() {
+            if (firstCard.dataset.symbol === secondCard.dataset.symbol) {
+                disableCards();
+                matchedPairs++;
+                if (matchedPairs === symbols.length) {
+                    document.getElementById('message').textContent = "🎉 Bravo, vous avez gagné !";
+                }
+            } else {
+                unflipCards();
+            }
+        }
+
+        function disableCards() {
+            firstCard.removeEventListener('click', flipCard);
+            secondCard.removeEventListener('click', flipCard);
+            resetBoard();
+        }
+
+        function unflipCards() {
+            lockBoard = true;
+            setTimeout(() => {
+                firstCard.classList.remove('flipped');
+                secondCard.classList.remove('flipped');
+                firstCard.textContent = '';
+                secondCard.textContent = '';
+                resetBoard();
+            }, 1000);
+        }
+
+        function resetBoard() {
+            [firstCard, secondCard] = [null, null];
+            lockBoard = false;
+        }
+
+        createBoard();
+    </script>
+
+</body>
+</html>
 
